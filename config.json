@@ -7,7 +7,7 @@
     "user_remote":"user remote",
     "password_remote":"password remote",
     "time_sleep":600,
-    "labels":{ "name_Folder1":"somes,labels,that,is,in,name,of,file1",
-               "name_folder2":"somes,labels,that,is,in,name,of,file2"
+    "labels":{ "name_local_Folder1":"somes,labels,that,is,in,name,of,file1",
+               "name_local_folder2":"somes,labels,that,is,in,name,of,file2"
             }
 }
