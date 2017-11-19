@@ -1,0 +1,13 @@
+{
+    "tg_api":"KEYAPITELEGRAM",
+    "tg_chats_ids":"CHATID1,CHATID2",
+    "path_local":"path local",
+    "path_remote":"path remote",
+    "host_remote":"host remote",
+    "user_remote":"user remote",
+    "password_remote":"password remote",
+    "time_sleep":600,
+    "labels":{ "file1":"somes,labels,that,is,in,name,of,file1",
+               "file2":"somes,labels,that,is,in,name,of,file2"
+            }
+}
