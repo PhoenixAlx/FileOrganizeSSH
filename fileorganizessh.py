@@ -52,41 +52,71 @@ def download_files(conf):
    files_in_folder=ftp_client.listdir(path=path_files)
    if (len(files_in_folder)>0):
        #copy file in folders local
+       text='%s files found, i am going to download'%(len(files_in_folder));
+       send_messages_bot(conf,text);
        for f in files_in_folder:
            #send message save files
-           text='files found, i am going to download';
+           text='file %s downloading'%(f);
            send_messages_bot(conf,text);
            #get labels for files in conf
            labels=conf['labels'];
            labels_folders=labels.keys();
+           path_file_remote=path_files+"/"+f;
            #check all ok labels in file name
+           file_saved=False;
            for lf in labels_folders:
                labes_in_folder=labels[lf].split(",");
                total_ok=0;
+               folder_local="";
                for l in labes_in_folder:
                    if (l.lower() in f.lower()):
                        total_ok=total_ok+1;
-               if (total_ok==len(labes_in_folder)):
+               if (total_ok==len(labes_in_folder) and not file_saved):
                    #save file in folder
-                   path_file_remote=path_files+"/"+f;
                    folder_local=conf['path_local']+"/"+lf;
-                   
                    if not os.path.exists(folder_local):
                        os.makedirs(folder_local)
+               
                    path_file_local=folder_local+"/"+f;
-
                    ftp_client.get(path_file_remote,path_file_local);
                    #send message file save
-                   text='file %s saved'%(f);
+                   text='file %s saved in %s'%(f,path_file_local);
                    send_messages_bot(conf,text);
                    #remove remote file
                    ftp_client.remove(path_file_remote);
                    #send message file remove
-                   text='file %s removed'%(f);
+                   text='file %s removed of %s'%(f,path_file_remote);
                    send_messages_bot(conf,text);
+                   file_saved=True;
+           if not file_saved:
+               #copy in unknowfolder
+               folder_local=conf['path_local_unknown'];
+               text=' New type of files  %s '%(f);
+               send_messages_bot(conf,text);
+               if not os.path.exists(folder_local):
+                       os.makedirs(folder_local)
+               
+               path_file_local=folder_local+"/"+f;
+               ftp_client.get(path_file_remote,path_file_local);
+               #send message file save
+               text='file %s saved in %s'%(f,path_file_local);
+               send_messages_bot(conf,text);
+               #remove remote file
+               ftp_client.remove(path_file_remote);
+               #send message file remove
+               text='file %s removed of %s'%(f,path_file_remote);
+               send_messages_bot(conf,text);
+               file_saved=True;
+                                  
+               
+ 
+                
+                    
+            
+       text='%s files downloaded'%(len(files_in_folder));
+       send_messages_bot(conf,text);
    ftp_client.close()
    return True;
-
 def tests():
     conf=read_configuration(name_file="config.json");
     if (conf=={}):
@@ -98,8 +128,21 @@ def main():
     conf=read_configuration(name_file="config.json");
     text='Start watch files in %s '%(conf["path_remote"]);
     send_messages_bot(conf,text);
-    while (True):
-        download_files(conf);
-        time.sleep(conf['time_sleep'])
-        
+    no_error=True;
+    count_error=0;
+    while (no_error):
+        if count_error<conf['limit_errors']:
+            try:
+                download_files(conf);
+            except:
+                text="upps!!!. Something is wrong downloading files. I am going to wait %s seconds and i will try again."%(str(conf['time_sleep']));
+                send_messages_bot(conf,text);
+                count_error=count_error+1;
+            time.sleep(conf['time_sleep']);
+        else:
+            text="so many errors.";
+            send_messages_bot(conf,text);
+            no_error=False;
+        conf=read_configuration(name_file="config.json");
+       
 main();
